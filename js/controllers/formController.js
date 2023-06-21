@@ -1,5 +1,6 @@
 import Address from "../models/Address.js";
 import * as addressService from '../services/address-service.js';
+import * as listCrontroller from '../controllers/listController.js';
 
 function State(){
 
@@ -74,8 +75,19 @@ async function handleinputCep(event){
 
 async function handleBtnSave(event){
     event.preventDefault();
+    const errors = addressService.getErrors(state.address);
+    const keys = Object.keys(errors);
+    if (keys.length > 0){
+        for (let i = 0; i < keys.length; i++){
+            setFormError(keys[i], errors[keys[i]]);
+        }
+    }else {
+        listCrontroller.addcard(state.address);
+        clearForm();
+    }
+    
     //const result = await requestService.getJson('https://viacep.com.br/ws/01001000/json/');
-    console.log(state.address);
+    console.log(errors);
 }
 
 function handleInputNumber(event) {
@@ -104,6 +116,8 @@ function clearForm (){
 
     setFormError("cep", "");
     setFormError("number", "");
+
+    state.address = new Address();
 
     state.inputCep.focus();
 }
